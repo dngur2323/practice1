@@ -1,76 +1,24 @@
 package com.sist.dao;
 import java.util.*;
+
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.support.SqlSessionDaoSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
 import java.sql.*;
-public class HotelDAO {
-	private Connection conn;
-	private PreparedStatement ps;
-	private String url,username,password;
-	public void setUrl(String url) {
-		this.url = url;
-	}
-	public void setUsername(String username) {
-		this.username = username;
-	}
-	public void setPassword(String password) {
-		this.password = password;
-	}
-    
-	public HotelDAO(String driverName)
-	{
-		try
-		{
-			Class.forName(driverName);
-		}catch(Exception ex) {}
-	}
-	public void getConnection()
-	{
-		try
-		{
-			conn=DriverManager.getConnection(url,username,password);
-		}catch(Exception ex) {}
-	}
-	public void disConnection()
-	{
-		try
-		{
-			if(ps!=null) ps.close();
-			if(conn!=null) conn.close();
-		}catch(Exception ex) {}
+@Repository("hdao")
+public class HotelDAO extends SqlSessionDaoSupport{
+
+	@Autowired
+	public void setSqlSessionFactory(SqlSessionFactory sqlSessionFactory) {
+		// TODO Auto-generated method stub
+		super.setSqlSessionFactory(sqlSessionFactory);
 	}
 	
-	public List<HotelVO> hotelListData(String address)
+	public List<HotelVO> hotelListData()
 	{
-		List<HotelVO> list=new ArrayList<HotelVO>();
-		try
-		{
-			getConnection();
-			String sql="SELECT no,name,address,score "
-					+ "FROM seoul_hotel "
-					+ "WHERE address LIKE '%'||?||'%' "
-					+ "ORDER BY no ASC";
-			ps=conn.prepareStatement(sql);
-			ps.setString(1, address);
-			ResultSet rs=ps.executeQuery();
-			while(rs.next())
-			{
-				HotelVO vo=new HotelVO();
-				vo.setNo(rs.getInt(1));
-				vo.setName(rs.getString(2));
-				vo.setAddress(rs.getString(3));
-				vo.setScore(rs.getDouble(4));
-				list.add(vo);
-			}
-			rs.close();
-		}catch(Exception ex)
-		{
-			ex.printStackTrace();
-		}
-		finally
-		{
-			disConnection();
-		}
-		return list;
+		return getSqlSession().selectList("hotelListData");	
 	}
-	
 	
 }
